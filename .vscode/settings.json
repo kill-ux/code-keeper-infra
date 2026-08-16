@@ -1,0 +1,24 @@
+{
+    "material-icon-theme.files.associations": {
+        "*.tfvars.example": "terraform",
+    },
+    "material-icon-theme.folders.associations": {
+        "vpc": "Cloudflare",
+        "alb": "Connection",
+        "ecs": "App",
+        "ecr": "Database",
+        "iam": "Admin",
+        "ebs": "Migrations",
+        "ecs_db_instance": "Database",
+        "cognito" : "admin",
+        "ecs_task": "Custom",
+        "security_group": "Core",
+        "dashboard": "review",
+        "workload": "Job",
+        "foundation": "webpack",
+        "acm": "cobol",
+        "_envcommon": "Api",
+        "staging": "Atom",
+        "production": "store"
+    },
+}

@@ -1,0 +1,7 @@
+terraform {
+  source = "${dirname(find_in_parent_folders("root.hcl"))}//foundation-source"
+}
+
+include "env" {
+  path = find_in_parent_folders("env.hcl")
+}
