@@ -4,4 +4,4 @@
 *.env
 *.tfstate.*
 .keys
-# .terragrunt-cache
+.terragrunt-cache
