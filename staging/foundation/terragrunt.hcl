@@ -1,3 +1,7 @@
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+
 terraform {
   source = "${dirname(find_in_parent_folders("root.hcl"))}//foundation-source"
 }
@@ -17,4 +21,15 @@ locals {
   billing_db_user       = get_env("BILLING_DB_USER")
   billing_db_password   = get_env("BILLING_DB_PASS")
   billing_db_name       = "billing_db"
+}
+
+inputs = {
+  rabbitmq_user          = local.rabbitmq_user
+  rabbitmq_password      = local.rabbitmq_password
+  inventory_db_user      = local.inventory_db_user
+  inventory_db_password  = local.inventory_db_password
+  inventory_db_name      = local.inventory_db_name
+  billing_db_user        = local.billing_db_user
+  billing_db_password    = local.billing_db_password
+  billing_db_name        = local.billing_db_name
 }

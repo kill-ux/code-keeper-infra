@@ -3,7 +3,7 @@ module "api_gateway_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "api-gateway"
-  container_image = "${local.ecr_registry["api-gateway-app"]}:1.0.0"
+  container_image = "${local.ecr_registry["api-gateway"]}:1.0.0"
   container_port  = 3000
   port_name       = "api-gateway"
   dns_name        = "api-gateway"

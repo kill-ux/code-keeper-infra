@@ -9,27 +9,27 @@ data "terraform_remote_state" "foundation" {
 }
 
 locals {
-  vpc_id                          = data.terraform_remote_state.foundation.outputs.vpc_id
-  private_subnet_ids              = data.terraform_remote_state.foundation.outputs.private_subnet_ids
-  public_subnet_ids               = data.terraform_remote_state.foundation.outputs.public_subnet_ids
-  ecs_execution_role_arn          = data.terraform_remote_state.foundation.outputs.ecs_execution_role_arn
-  ecs_instance_profile_name       = data.terraform_remote_state.foundation.outputs.ecs_instance_profile_name
-  service_discovery_namespace_arn = data.terraform_remote_state.foundation.outputs.service_discovery_namespace_arn
-  private_subnet_azs              = data.terraform_remote_state.foundation.outputs.private_subnet_azs
-  secrets_arn                     = data.terraform_remote_state.foundation.outputs.secrets_arn
-  ecr_registry                    = data.terraform_remote_state.foundation.outputs.ecr_registry
+  vpc_id                          = var.vpc_id
+  private_subnet_ids              = var.private_subnet_ids
+  public_subnet_ids               = var.public_subnet_ids
+  ecs_execution_role_arn          = var.ecs_execution_role_arn
+  ecs_instance_profile_name       = var.ecs_instance_profile_name
+  service_discovery_namespace_arn = var.service_discovery_namespace_arn
+  private_subnet_azs              = var.private_subnet_azs
+  secrets_arn                     = var.secrets_arn
+  ecr_registry                    = var.ecr_registry
 
-  aws_gateway_sg_id  = data.terraform_remote_state.foundation.outputs.aws_gateway_sg_id
-  alb_sg_id          = data.terraform_remote_state.foundation.outputs.alb_sg_id
-  ecs_instance_sg_id = data.terraform_remote_state.foundation.outputs.ecs_instance_sg_id
-  gateway_sg_id      = data.terraform_remote_state.foundation.outputs.gateway_sg_id
-  rabbitmq_sg_id     = data.terraform_remote_state.foundation.outputs.rabbitmq_sg_id
-  inventory_sg_id     = data.terraform_remote_state.foundation.outputs.inventory_sg_id
-  inventory_db_sg_id     = data.terraform_remote_state.foundation.outputs.inventory_db_sg_id
-  billing_sg_id     = data.terraform_remote_state.foundation.outputs.billing_sg_id
-  billing_db_sg_id     = data.terraform_remote_state.foundation.outputs.billing_db_sg_id
+  aws_gateway_sg_id  = var.aws_gateway_sg_id
+  alb_sg_id          = var.alb_sg_id
+  ecs_instance_sg_id = var.ecs_instance_sg_id
+  gateway_sg_id      = var.gateway_sg_id
+  rabbitmq_sg_id     = var.rabbitmq_sg_id
+  inventory_sg_id     = var.inventory_sg_id
+  inventory_db_sg_id     = var.inventory_db_sg_id
+  billing_sg_id     = var.billing_sg_id
+  billing_db_sg_id     = var.billing_db_sg_id
 
-  cert_arn = data.terraform_remote_state.foundation.outputs.cert_arn
+  cert_arn = var.cert_arn
 }
 
 module "alb" {
