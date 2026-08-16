@@ -1,0 +1,6 @@
+.terraform*
+*.tfvars
+*.tfvars.json
+*.env
+*.tfstate.*
+.keys

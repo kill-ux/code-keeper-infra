@@ -1,0 +1,178 @@
+
+# CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "task_logs" {
+  name              = "/ecs/${var.task_name}"
+  retention_in_days = var.log_retention_days
+  tags              = merge(var.tags, { "Name" = "${var.task_name}-logs" })
+}
+
+# Task Definition
+resource "aws_ecs_task_definition" "task" {
+  family                   = var.task_name
+  requires_compatibilities = ["EC2"]
+  network_mode             = "awsvpc"
+  cpu                      = var.cpu
+  memory                   = var.memory
+  execution_role_arn       = var.execution_role_arn
+
+
+
+
+  container_definitions = jsonencode([
+    {
+      name      = var.container_name != "" ? var.container_name : var.task_name
+      image     = var.container_image
+      cpu       = var.cpu
+      memory    = var.memory
+      essential = true
+      portMappings = [
+        {
+          name          = var.port_name
+          containerPort = var.container_port
+          protocol      = "tcp"
+        }
+      ]
+
+      secrets     = var.secrets
+      environment = var.environment_variables
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.task_logs.name
+          "awslogs-region"        = data.aws_region.current.region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+      mountPoints = var.enable_ebs_mounts ? [
+        {
+          sourceVolume  = "${var.task_name}-volume"
+          containerPath = "/var/lib/postgresql/main"
+          readOnly      = false
+        }
+      ] : []
+    }
+  ])
+
+  dynamic "volume" {
+    for_each = var.enable_ebs_mounts ? [1] : []
+    content {
+      name      = "${var.task_name}-volume"
+      host_path = "/mnt/${var.task_name}/pgdata"
+    }
+  }
+
+  dynamic "placement_constraints" {
+    for_each = var.placement_constraint_expression != "" ? [1] : []
+    content {
+      type       = "memberOf"
+      expression = var.placement_constraint_expression
+    }
+  }
+
+  tags = merge(var.tags, { "Name" = "${var.task_name}-task-def" })
+}
+
+
+# ECS Service
+resource "aws_ecs_service" "service" {
+  name                               = "${var.task_name}-service"
+  cluster                            = var.cluster_id
+  task_definition                    = aws_ecs_task_definition.task.arn
+  desired_count                      = var.desired_count
+  force_new_deployment               = true
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
+  # availability_zone_rebalancing      = "DISABLED"
+  force_delete = true
+
+  launch_type = var.placement_constraint_expression != "" ? "EC2" : null
+
+  dynamic "capacity_provider_strategy" {
+    for_each = var.placement_constraint_expression == "" ? [1] : []
+    content {
+      capacity_provider = var.capacity_provider_name
+      weight            = 100 // we don't care here because we have juat one capacity (hwo many ersantage run in ec2 of tasks)
+      base              = 0   // also we don't care so all the things well be in ec2 so we to not desice if base run at least on or two
+    }
+  }
+
+  network_configuration {
+    subnets         = var.subnets
+    security_groups = var.security_groups
+  }
+
+  dynamic "service_connect_configuration" {
+    for_each = var.enable_service_connect ? [1] : []
+    content {
+      enabled   = true
+      namespace = var.service_discovery_namespace_arn
+      service {
+        discovery_name = var.discovery_name != "" ? var.discovery_name : var.task_name
+        port_name      = var.port_name
+        client_alias {
+          port     = var.container_port
+          dns_name = var.dns_name != "" ? var.dns_name : var.task_name
+        }
+      }
+    }
+  }
+
+  dynamic "load_balancer" {
+    for_each = var.target_group_arn != "" ? [1] : []
+
+    content {
+      target_group_arn = var.target_group_arn
+      container_name   = var.container_name != "" ? var.container_name : var.task_name
+      container_port   = var.container_port
+    }
+  }
+
+  dynamic "placement_constraints" {
+    for_each = var.enable_distinct_instance ? [1] : []
+    content {
+      type = "distinctInstance"
+    }
+  }
+
+  tags = merge(var.tags, { "Name" = "${var.task_name}-service" })
+
+  depends_on = [aws_cloudwatch_log_group.task_logs, aws_ecs_task_definition.task]
+}
+
+# Data source for current region
+data "aws_region" "current" {}
+
+
+resource "aws_appautoscaling_target" "autoscaling_target" {
+  count              = var.enable_autoscaling ? 1 : 0
+  max_capacity       = var.max_capacity
+  min_capacity       = var.min_capacity
+  resource_id        = "service/${var.cluster_name}/${aws_ecs_service.service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+
+resource "aws_appautoscaling_policy" "scaling_policy" {
+  count              = var.enable_autoscaling ? 1 : 0
+  name               = "${var.task_name}-${var.scaling_metric}-autoscaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.autoscaling_target[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.autoscaling_target[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.autoscaling_target[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = var.target_value
+    scale_out_cooldown = var.scale_out_cooldown
+    scale_in_cooldown  = var.scale_in_cooldown
+
+    predefined_metric_specification {
+      predefined_metric_type = (
+        var.scaling_metric == "requests" ? "ALBRequestCountPerTarget" :
+        var.scaling_metric == "memory" ? "ECSServiceAverageMemoryUtilization" :
+      "ECSServiceAverageCPUUtilization")
+
+      resource_label = var.scaling_metric == "requests" ? "${var.alb_arn_suffix}/${var.alb_target_group_arn_suffix}" : null
+    }
+  }
+}
