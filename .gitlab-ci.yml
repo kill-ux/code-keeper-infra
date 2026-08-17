@@ -3,6 +3,7 @@ image:
   entrypoint: [""]
 
 stages:
+  - init
   - validate
   - plan
   - apply_staging
@@ -17,6 +18,20 @@ cache:
   paths:
     - .terragrunt-cache/
 
+init:
+  stage: init
+  script:
+    - |
+      set -eu
+      for environment in staging; do
+        echo "Init ${environment}"
+        
+        terragrunt run --all \
+          --working-dir "${environment}" \
+          --non-interactive \
+          init
+      done
+
 validate:
   stage: validate
   script:
@@ -24,10 +39,6 @@ validate:
       set -eu
       for environment in staging; do 
         echo "Validating ${environment}"
-        terragrunt run --all \
-          --working-dir "${environment}" \
-          --non-interactive \
-          init
 
         terragrunt run --all \
         --working-dir "${environment}" \
