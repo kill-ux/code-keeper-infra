@@ -54,12 +54,12 @@ plan_staging:
     - |
       set -eu
 
-      terragrunt run --all \
+      terragrunt plan --all \
         --working-dir staging \
-        plan \
         -no-color \
         -out="$CI_PROJECT_DIR/staging.tfplan" \
         | tee "$CI_PROJECT_DIR/staging-plan.txt"
+      
   artifacts:
     when: always
     expire_in: 1 week
