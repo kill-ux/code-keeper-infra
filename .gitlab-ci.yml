@@ -25,7 +25,7 @@ init:
       set -eu
       for environment in staging; do
         echo "Init ${environment}"
-        
+
         terragrunt run --all \
           --working-dir "${environment}" \
           --non-interactive \
@@ -45,3 +45,24 @@ validate:
         --non-interactive \
         validate
       done
+
+plan_staging:
+  stage: plan
+  needs:
+    - validate
+  script:
+    - |
+      set -eu
+
+      terragrunt run --all \
+        --working-dir staging \
+        plan \
+        -no-color \
+        -out="$CI_PROJECT_DIR/staging.tfplan" \
+        | tee "$CI_PROJECT_DIR/staging-plan.txt"
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - staging-plan.txt
+      - staging.tfplan
