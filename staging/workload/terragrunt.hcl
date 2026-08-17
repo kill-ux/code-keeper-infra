@@ -86,11 +86,11 @@ dependency "foundation" {
 }
 
 locals {
-  api_gateway_image   = get_env("API_GATEWAY_IMAGE")
-  inventory_app_image = get_env("INVENTORY_APP_IMAGE")
-  billing_app_image   = get_env("BILLING_APP_IMAGE")
-  rabbitmq_image      = get_env("RABBITMQ_IMAGE")
-  postgres_db_image   = get_env("POSTGRES_IMAGE")
+  api_gateway_image   = "killux3k/api-gateway:latest"
+  inventory_app_image = "killux3k/inventory-app:latest"
+  billing_app_image   = "killux3k/billing-app:latest"
+  rabbitmq_image      = "killux3k/rabbitmq:latest"
+  postgres_db_image   = "killux3k/postgres-db:latest"
 }
 
 include "env" {
