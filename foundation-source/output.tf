@@ -30,10 +30,6 @@ output "secrets_arn" {
   value = module.secrets.cloud_design_credentials_arn
 }
 
-output "ecr_registry" {
-  value = module.ecr.ecr_registry
-}
-
 output "aws_gateway_sg_id" {
   value = module.aws_gateway_sg.id
 }
@@ -77,6 +73,6 @@ output "cert_arn" {
   value = module.acm.cert_arn
 }
 
-output "vpc_endpoints_sg_id" {
-  value = module.vpc_endpoints_sg.id
+output "cert_validation_details" {
+  value = module.acm.cert_validation_details
 }

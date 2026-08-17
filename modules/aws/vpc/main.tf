@@ -85,38 +85,24 @@ resource "aws_route_table_association" "private_rt_association" {
   subnet_id      = each.value.id
 }
 
-locals {
-  interface_endpoint_services = [
-    "ecr.api",
-    "ecr.dkr",
-    "ecs",
-    "ecs-telemetry",
-    "ecs-agent",
-    "logs",
-    "secretsmanager",
-    "ssm",
-    "ssmmessages",
-    "ec2messages",
-  ]
+
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = { "Name" = "cloud-design-nat-eip" }
 }
 
-resource "aws_vpc_endpoint" "interface" {
-  for_each            = toset(local.interface_endpoint_services)
-  vpc_id              = aws_vpc.cloud-design-vpc.id
-  service_name        = "com.amazonaws.${var.aws_region}.${each.value}"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [for s in aws_subnet.private : s.id]
-  security_group_ids  = [var.vpc_endpoints_sg_id]
-  private_dns_enabled = true
+resource "aws_nat_gateway" "this" {
+  allocation_id = aws_eip.nat.id
+  subnet_id = aws_subnet.public["public_1"].id
 
-  tags = { "Name" = "cloud-design-${each.value}-endpoint" }
+  tags = { "Name" = "cloud-design-nat-gateway" }
+
+  depends_on = [ aws_internet_gateway.gw ]
 }
 
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = aws_vpc.cloud-design-vpc.id
-  service_name      = "com.amazonaws.${var.aws_region}.s3"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = [aws_route_table.private_rt.id]
-
-  tags = { "Name" = "cloud-design-s3-endpoint" }
+resource "aws_route" "private_nat" {
+  route_table_id = aws_route_table.private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.this.id
 }

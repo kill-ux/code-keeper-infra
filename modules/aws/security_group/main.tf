@@ -5,6 +5,10 @@ resource "aws_security_group" "sg" {
   vpc_id      = var.vpc_id
 
   tags = merge(var.tags, { "Name" = var.name })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Ingress rules

@@ -15,7 +15,6 @@ inputs = {
   service_discovery_namespace_arn = dependency.foundation.outputs.service_discovery_namespace_arn
   private_subnet_azs              = dependency.foundation.outputs.private_subnet_azs
   secrets_arn                     = dependency.foundation.outputs.secrets_arn
-  ecr_registry                    = dependency.foundation.outputs.ecr_registry
   aws_gateway_sg_id               = dependency.foundation.outputs.aws_gateway_sg_id
   alb_sg_id                       = dependency.foundation.outputs.alb_sg_id
   ecs_instance_sg_id              = dependency.foundation.outputs.ecs_instance_sg_id
@@ -26,6 +25,12 @@ inputs = {
   billing_sg_id                   = dependency.foundation.outputs.billing_sg_id
   billing_db_sg_id                = dependency.foundation.outputs.billing_db_sg_id
   cert_arn                        = dependency.foundation.outputs.cert_arn
+  cert_validation_details         = dependency.foundation.outputs.cert_validation_details
+  api_gateway_image               = local.api_gateway_image
+  inventory_app_image             = local.inventory_app_image
+  billing_app_image               = local.billing_app_image
+  rabbitmq_image                  = local.rabbitmq_image
+  postgres_db_image               = local.postgres_db_image
 }
 
 dependency "foundation" {
@@ -67,11 +72,25 @@ dependency "foundation" {
     billing_sg_id      = "sg-mock8"
     billing_db_sg_id   = "sg-mock9"
     cert_arn           = "arn:aws:acm:eu-west-3:000000000000:certificate/mock"
+    cert_validation_details = {
+      domain       = "cloud.hansel.lol"
+      record_name  = "_validation-record-will-be-known-during-apply"
+      record_type  = "CNAME"
+      record_value = "_validation-value-will-be-known-during-apply"
+    }
   }
 
   mock_outputs_allowed_terraform_commands = [
     "plan", "validate"
   ]
+}
+
+locals {
+  api_gateway_image   = get_env("API_GATEWAY_IMAGE")
+  inventory_app_image = get_env("INVENTORY_APP_IMAGE")
+  billing_app_image   = get_env("BILLING_APP_IMAGE")
+  rabbitmq_image      = get_env("RABBITMQ_IMAGE")
+  postgres_db_image   = get_env("POSTGRES_IMAGE")
 }
 
 include "env" {

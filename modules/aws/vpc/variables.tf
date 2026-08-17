@@ -8,8 +8,3 @@ variable "aws_region" {
   type        = string
 }
 
-variable "vpc_endpoints_sg_id" {
-  description = "Vpc endpoints sg id"
-  type = string
-}
-

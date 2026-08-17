@@ -21,22 +21,31 @@ module "alb_sg" {
   source = "../modules/aws/security_group"
 
   name        = "alb_sg"
-  description = "Allow inbound Aws API Gateway  traffic to ALB"
+  description = "Allow inbound traffic to ALB"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_rules = [
+  ingress_rules = var.enable_custom_domain ? [
     {
-      description                  = "Allow HTTP from Aws API Gateway "
+      description                  = "Allow HTTP from AWS API Gateway"
       from_port                    = 80
       protocol                     = "tcp"
       to_port                      = 80
       referenced_security_group_id = module.aws_gateway_sg.id
+      cidr_ipv4                    = null
+    }
+  ] : [
+    {
+      description                  = "Allow HTTP from internet"
+      from_port                    = 80
+      protocol                     = "tcp"
+      to_port                      = 80
+      referenced_security_group_id = null
+      cidr_ipv4                    = "0.0.0.0/0"
     }
   ]
 
   tags = { "Component" = "alb" }
 }
-
 # ===== ECS Instance Security Group =====
 module "ecs_instance_sg" {
   source = "../modules/aws/security_group"

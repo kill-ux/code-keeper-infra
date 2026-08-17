@@ -79,8 +79,8 @@ resource "aws_apigatewayv2_vpc_link" "alb_link" {
   subnet_ids         = var.private_subnet_ids
 }
 
-
 resource "aws_apigatewayv2_domain_name" "custom_domain" {
+  count       = var.enable_custom_domain ? 1 : 0
   domain_name = var.domain_name
   domain_name_configuration {
     certificate_arn = var.cert_arn
@@ -90,20 +90,48 @@ resource "aws_apigatewayv2_domain_name" "custom_domain" {
 }
 
 resource "aws_apigatewayv2_api_mapping" "mapping" {
+  count       = var.enable_custom_domain ? 1 : 0
   api_id      = aws_apigatewayv2_api.gateway.id
-  domain_name = aws_apigatewayv2_domain_name.custom_domain.id
+  domain_name = aws_apigatewayv2_domain_name.custom_domain[0].id
   stage       = aws_apigatewayv2_stage.default.id
 }
 
 data "aws_route53_zone" "this" {
+  count        = var.enable_custom_domain ? 1 : 0
   name         = "hansel.lol"
   private_zone = false
 }
 
+resource "aws_route53_record" "cert_validation" {
+  count = var.enable_custom_domain && var.cert_validation_details != null ? 1 : 0
+
+  zone_id = data.aws_route53_zone.this[0].zone_id
+  name    = var.cert_validation_details.record_name
+  type    = var.cert_validation_details.record_type
+  ttl     = 60
+  records = [var.cert_validation_details.record_value]
+}
+
+resource "aws_acm_certificate_validation" "api_cert_val" {
+  count = var.enable_custom_domain && var.cert_validation_details != null ? 1 : 0
+
+  certificate_arn = var.cert_arn
+
+  validation_record_fqdns = [
+    for record in aws_route53_record.cert_validation : record.fqdn
+  ]
+}
+
 resource "aws_route53_record" "api_custom_domain" {
-  zone_id = data.aws_route53_zone.this.zone_id
-  name = var.domain_name
-  type = "CNAME"
-  ttl = 300
-  records = [aws_apigatewayv2_domain_name.custom_domain.domain_name_configuration[0].target_domain_name]
+  count   = var.enable_custom_domain ? 1 : 0
+  zone_id = data.aws_route53_zone.this[0].zone_id
+  name    = var.domain_name
+  type    = "CNAME"
+  ttl     = 300
+
+  records = [
+    aws_apigatewayv2_domain_name.custom_domain[0]
+      .domain_name_configuration[0]
+      .target_domain_name
+  ]
 }

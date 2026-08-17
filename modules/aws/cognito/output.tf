@@ -16,5 +16,5 @@ output "api_gateway_url" {
 
 output "target_domain_name" {
   description = "The target domain name created by API Gateway to point DNS to"
-  value = aws_apigatewayv2_domain_name.custom_domain.domain_name_configuration[0].target_domain_name
+  value = var.enable_custom_domain ? aws_apigatewayv2_domain_name.custom_domain[0].domain_name_configuration[0].target_domain_name : null
 }

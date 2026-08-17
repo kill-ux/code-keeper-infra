@@ -48,11 +48,6 @@ variable "secrets_arn" {
   type        = string
 }
 
-variable "ecr_registry" {
-  description = "ECR registry URL"
-  type        = map(string)
-}
-
 variable "aws_gateway_sg_id" {
   description = "Security group ID for the AWS gateway"
   type        = string
@@ -103,3 +98,33 @@ variable "cert_arn" {
   type        = string
 }
 
+
+
+variable "api_gateway_image" {
+  description = "Full Docker image reference for api-gateway (repo:tag)"
+  type        = string
+}
+
+variable "inventory_app_image" {
+  description = "Full Docker image reference for inventory-app (repo:tag)"
+  type        = string
+}
+
+variable "billing_app_image" {
+  description = "Full Docker image reference for billing-app (repo:tag)"
+  type        = string
+}
+
+variable "rabbitmq_image" {
+  description = "Full Docker image reference for rabbitmq (repo:tag)"
+  type        = string
+}
+
+variable "postgres_db_image" {
+  description = "Full Docker image reference for postgres-db (repo:tag)"
+  type        = string
+}
+
+variable "cert_validation_details" {
+  
+}

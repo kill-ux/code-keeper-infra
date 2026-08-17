@@ -26,3 +26,19 @@ variable "domain_name" {
 variable "cert_arn" {
   type = string
 }
+
+variable "enable_custom_domain" {
+  type    = bool
+  default = false
+}
+
+variable "cert_validation_details" {
+  description = "Certificate validation details"
+  type = object({
+    domain       = string
+    record_name  = string
+    record_type  = string
+    record_value = string
+  })
+  default = null
+}

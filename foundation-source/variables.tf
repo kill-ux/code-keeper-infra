@@ -53,3 +53,8 @@ variable "billing_db_name" {
   description = "billing DB name"
   type        = string
 }
+
+variable "enable_custom_domain" {
+  type = bool
+  default = false
+}

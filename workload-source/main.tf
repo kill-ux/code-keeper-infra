@@ -17,17 +17,17 @@ locals {
   service_discovery_namespace_arn = var.service_discovery_namespace_arn
   private_subnet_azs              = var.private_subnet_azs
   secrets_arn                     = var.secrets_arn
-  ecr_registry                    = var.ecr_registry
 
   aws_gateway_sg_id  = var.aws_gateway_sg_id
   alb_sg_id          = var.alb_sg_id
   ecs_instance_sg_id = var.ecs_instance_sg_id
   gateway_sg_id      = var.gateway_sg_id
   rabbitmq_sg_id     = var.rabbitmq_sg_id
-  inventory_sg_id     = var.inventory_sg_id
-  inventory_db_sg_id     = var.inventory_db_sg_id
-  billing_sg_id     = var.billing_sg_id
-  billing_db_sg_id     = var.billing_db_sg_id
+  inventory_sg_id    = var.inventory_sg_id
+  inventory_db_sg_id = var.inventory_db_sg_id
+  billing_sg_id      = var.billing_sg_id
+  billing_db_sg_id   = var.billing_db_sg_id
+  cert_validation_details = jsondecode(var.cert_validation_details)
 
   cert_arn = var.cert_arn
 }
@@ -36,6 +36,7 @@ module "alb" {
   source             = "../modules/aws/alb"
   alb_sg_id          = local.alb_sg_id
   private_subnet_ids = local.private_subnet_ids
+  public_subnet_ids  = local.public_subnet_ids
   vpc_id             = local.vpc_id
 }
 
@@ -99,8 +100,9 @@ module "cognito" {
   security_group_id  = local.aws_gateway_sg_id
   private_subnet_ids = [local.private_subnet_ids[0]]
   alb_listener_arn   = module.alb.alb_listener_arn
-  domain_name = "cloud.hansel.lol"
-  cert_arn = local.cert_arn
+  domain_name        = "cloud.hansel.lol"
+  cert_arn           = local.cert_arn
+  cert_validation_details = local.cert_validation_details
 }
 
 module "dashboard" {

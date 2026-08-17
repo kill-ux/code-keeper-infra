@@ -3,7 +3,7 @@ module "api_gateway_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "api-gateway"
-  container_image = "${local.ecr_registry["api-gateway"]}:1.0.0"
+  container_image = var.api_gateway_image
   container_port  = 3000
   port_name       = "api-gateway"
   dns_name        = "api-gateway"
@@ -86,7 +86,7 @@ module "rabbitmq_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "rabbitmq"
-  container_image = "${local.ecr_registry["rabbitmq"]}:1.0.0"
+  container_image = var.rabbitmq_image
   container_port  = 5672
   port_name       = "amqp"
   discovery_name  = "rabbitmq"
@@ -122,7 +122,7 @@ module "inventory_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "inventory"
-  container_image = "${local.ecr_registry["inventory-app"]}:1.0.0"
+  container_image = var.inventory_app_image
   container_port  = 8080
   port_name       = "inventory"
   discovery_name  = "inventory"
@@ -183,7 +183,7 @@ module "inventory_db_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "inventory-db"
-  container_image = "${local.ecr_registry["postgres-db"]}:1.0.0"
+  container_image = var.postgres_db_image
   container_port  = 5432
   port_name       = "inventory-db"
   discovery_name  = "inventory-db"
@@ -227,7 +227,7 @@ module "billing_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "billing"
-  container_image = "${local.ecr_registry["billing-app"]}:1.0.0"
+  container_image = var.billing_app_image
   container_port  = 8080
   port_name       = "billing"
   discovery_name  = "billing"
@@ -311,7 +311,7 @@ module "billing_db_service" {
   source = "../modules/aws/ecs_task"
 
   task_name       = "billing-db"
-  container_image = "${local.ecr_registry["postgres-db"]}:1.0.0"
+  container_image = var.postgres_db_image
   container_port  = 5432
   port_name       = "billing-db"
   discovery_name  = "billing-db"

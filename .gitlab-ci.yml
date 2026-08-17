@@ -1,0 +1,36 @@
+image:
+  name: alpine/terragrunt:latest
+  entrypoint: [""]
+
+stages:
+  - validate
+  - plan
+  - apply_staging
+  - apply_production
+
+variables:
+  TF_IN_AUTOMATION: "true"
+  TG_DOWNLOAD_DIR: "$CI_PROJECT_DIR/.terragrunt-cache"
+
+cache:
+  key: terraform-providers
+  paths:
+    - .terragrunt-cache/
+
+validate:
+  stage: validate
+  script:
+    - |
+      set -eu
+      for environment in staging; do 
+        echo "Validating ${environment}"
+        terragrunt run --all \
+          --working-dir "${environment}" \
+          --non-interactive \
+          init -upgrade
+
+        terragrunt run --all \
+        --working-dir "${environment}" \
+        --non-interactive \
+        validate
+      done

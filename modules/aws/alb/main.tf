@@ -1,9 +1,9 @@
 resource "aws_lb" "cloud_design_alb" {
   name               = "cloud-design-alb"
-  internal           = true
+  internal           = var.enable_custom_domain
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
-  subnets            = var.private_subnet_ids
+  subnets            = var.enable_custom_domain ? var.private_subnet_ids : var.public_subnet_ids
 
   tags = { "Name" = "cloud-design-alb" }
 }
