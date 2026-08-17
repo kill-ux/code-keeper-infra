@@ -27,7 +27,7 @@ validate:
         terragrunt run --all \
           --working-dir "${environment}" \
           --non-interactive \
-          init -upgrade
+          init
 
         terragrunt run --all \
         --working-dir "${environment}" \
