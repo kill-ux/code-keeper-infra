@@ -20,5 +20,8 @@ variable "vpc_id" {
 
 variable "enable_custom_domain" {
   type    = bool
-  default = false
+}
+
+variable "environment" {
+  
 }

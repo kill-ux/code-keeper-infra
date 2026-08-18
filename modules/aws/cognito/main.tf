@@ -1,6 +1,6 @@
 # Cognito User Pool
 resource "aws_cognito_user_pool" "pool" {
-  name = "cloud-design-user-pool"
+  name = "cloud-design-user-pool-${var.environment}"
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
@@ -15,7 +15,7 @@ resource "aws_cognito_user_pool" "pool" {
 
 # App Client
 resource "aws_cognito_user_pool_client" "client" {
-  name            = "cloud-design-user-pool-client"
+  name            = "cloud-design-user-pool-client-${var.environment}"
   user_pool_id    = aws_cognito_user_pool.pool.id
   generate_secret = false
 
@@ -27,7 +27,7 @@ resource "aws_cognito_user_pool_client" "client" {
 
 # HTTP API Gateway
 resource "aws_apigatewayv2_api" "gateway" {
-  name          = "cloud-design-http-api"
+  name          = "cloud-design-http-api-${var.environment}"
   protocol_type = "HTTP"
 }
 
@@ -51,30 +51,8 @@ resource "aws_apigatewayv2_authorizer" "cognito_auth" {
   }
 }
 
-# ALB Backend Integration
-resource "aws_apigatewayv2_integration" "integration" {
-  api_id             = aws_apigatewayv2_api.gateway.id
-  integration_type   = "HTTP_PROXY"
-  integration_method = "ANY"
-
-  connection_type = "VPC_LINK"
-  connection_id   = aws_apigatewayv2_vpc_link.alb_link.id
-  integration_uri = var.alb_listener_arn
-}
-
-# Protected Route
-resource "aws_apigatewayv2_route" "protected_route" {
-  api_id    = aws_apigatewayv2_api.gateway.id
-  route_key = "ANY /{proxy+}"
-
-  authorization_type = "JWT"
-  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
-
-  target = "integrations/${aws_apigatewayv2_integration.integration.id}"
-}
-
 resource "aws_apigatewayv2_vpc_link" "alb_link" {
-  name               = "api-gateway-vpc-link"
+  name               = "api-gateway-vpc-link-${var.environment}"
   security_group_ids = [var.security_group_id]
   subnet_ids         = var.private_subnet_ids
 }
@@ -94,44 +72,4 @@ resource "aws_apigatewayv2_api_mapping" "mapping" {
   api_id      = aws_apigatewayv2_api.gateway.id
   domain_name = aws_apigatewayv2_domain_name.custom_domain[0].id
   stage       = aws_apigatewayv2_stage.default.id
-}
-
-data "aws_route53_zone" "this" {
-  count        = var.enable_custom_domain ? 1 : 0
-  name         = "hansel.lol"
-  private_zone = false
-}
-
-resource "aws_route53_record" "cert_validation" {
-  count = var.enable_custom_domain && var.cert_validation_details != null ? 1 : 0
-
-  zone_id = data.aws_route53_zone.this[0].zone_id
-  name    = var.cert_validation_details.record_name
-  type    = var.cert_validation_details.record_type
-  ttl     = 60
-  records = [var.cert_validation_details.record_value]
-}
-
-resource "aws_acm_certificate_validation" "api_cert_val" {
-  count = var.enable_custom_domain && var.cert_validation_details != null ? 1 : 0
-
-  certificate_arn = var.cert_arn
-
-  validation_record_fqdns = [
-    for record in aws_route53_record.cert_validation : record.fqdn
-  ]
-}
-
-resource "aws_route53_record" "api_custom_domain" {
-  count   = var.enable_custom_domain ? 1 : 0
-  zone_id = data.aws_route53_zone.this[0].zone_id
-  name    = var.domain_name
-  type    = "CNAME"
-  ttl     = 300
-
-  records = [
-    aws_apigatewayv2_domain_name.custom_domain[0]
-      .domain_name_configuration[0]
-      .target_domain_name
-  ]
 }

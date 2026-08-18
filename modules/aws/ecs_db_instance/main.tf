@@ -47,5 +47,5 @@ resource "aws_instance" "db_host" {
   EOF
 
 
-  tags = { Name = "cloud-design-${var.host_name}-instance" }
+  tags = { Name = "cloud-design-${var.host_name}-instance-${var.environment}" }
 }

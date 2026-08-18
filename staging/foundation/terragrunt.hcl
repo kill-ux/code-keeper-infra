@@ -15,6 +15,15 @@ inputs = {
   billing_db_user       = local.billing_db_user
   billing_db_password   = local.billing_db_password
   billing_db_name       = local.billing_db_name
+  cert_arn              = dependency.shared.outputs.cert_arn
+}
+
+dependency "shared" {
+  config_path = "../../shared/cert"
+
+  mock_outputs = {
+    cert_arn = "arn:aws:acm:eu-west-3:000000000000:certificate/mock"
+  }
 }
 
 include "env" {

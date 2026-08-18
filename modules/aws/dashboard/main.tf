@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_dashboard" "ecs_central_dashboard" {
-  dashboard_name = "CloudDesign-ECS-Cluster-Health"
+  dashboard_name = "CloudDesign-ECS-Cluster-Health-${var.environment}"
 
   dashboard_body = jsonencode({
     widgets = [

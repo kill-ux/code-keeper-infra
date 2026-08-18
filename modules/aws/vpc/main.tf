@@ -4,16 +4,16 @@ resource "aws_vpc" "cloud-design-vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    "Name" = "cloud-design-vpc"
+    "Name" = "cloud-design-vpc-${var.environment}"
   }
 }
 
 resource "aws_service_discovery_private_dns_namespace" "local" {
-  name        = "local"
+  name        = "local-${var.environment}"
   description = "Service Connect namespace"
   vpc         = aws_vpc.cloud-design-vpc.id
   tags = {
-    Name = "myapp-namespace"
+    Name = "myapp-namespace-${var.environment}"
   }
 }
 
@@ -51,7 +51,7 @@ resource "aws_subnet" "private" {
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.cloud-design-vpc.id
-  tags   = { "Name" = "cloud-design-igw" }
+  tags   = { "Name" = "cloud-design-igw-${var.environment}" }
 }
 
 resource "aws_route_table" "rt" {
@@ -62,7 +62,7 @@ resource "aws_route_table" "rt" {
     gateway_id = aws_internet_gateway.gw.id
   }
 
-  tags = { "Name" = "cloud-design-public-rt" }
+  tags = { "Name" = "cloud-design-public-rt-${var.environment}" }
 }
 
 resource "aws_route_table_association" "rt_association" {
@@ -75,7 +75,7 @@ resource "aws_route_table_association" "rt_association" {
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.cloud-design-vpc.id
 
-  tags = { "Name" = "cloud-design-private-rt" }
+  tags = { "Name" = "cloud-design-private-rt-${var.environment}" }
 }
 
 resource "aws_route_table_association" "private_rt_association" {
@@ -89,14 +89,14 @@ resource "aws_route_table_association" "private_rt_association" {
 resource "aws_eip" "nat" {
   domain = "vpc"
 
-  tags = { "Name" = "cloud-design-nat-eip" }
+  tags = { "Name" = "cloud-design-nat-eip-${var.environment}" }
 }
 
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat.id
   subnet_id = aws_subnet.public["public_1"].id
 
-  tags = { "Name" = "cloud-design-nat-gateway" }
+  tags = { "Name" = "cloud-design-nat-gateway-${var.environment}" }
 
   depends_on = [ aws_internet_gateway.gw ]
 }

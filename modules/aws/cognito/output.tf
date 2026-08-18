@@ -18,3 +18,15 @@ output "target_domain_name" {
   description = "The target domain name created by API Gateway to point DNS to"
   value = var.enable_custom_domain ? aws_apigatewayv2_domain_name.custom_domain[0].domain_name_configuration[0].target_domain_name : null
 }
+
+output "api_gateway_id" {
+  value = aws_apigatewayv2_api.gateway.id
+}
+
+output "vpc_link_id" {
+  value = aws_apigatewayv2_vpc_link.alb_link.id
+}
+
+output "authorizer_id" {
+  value = aws_apigatewayv2_authorizer.cognito_auth.id
+}

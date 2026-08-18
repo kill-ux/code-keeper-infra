@@ -65,14 +65,49 @@ output "billing_db_sg_id" {
   value = module.billing_db_sg.id
 }
 
-output "cert_validation_record" {
-  value = module.acm.cert_validation_record
+output "cognito_user_pool_id" {
+  description = "The ID of the Cognito User Pool"
+  value       = module.cognito.cognito_user_pool_id
 }
 
-output "cert_arn" {
-  value = module.acm.cert_arn
+output "cognito_user_pool_client_id" {
+  description = "The Client ID for client applications"
+  value       = module.cognito.cognito_user_pool_client_id
 }
 
-output "cert_validation_details" {
-  value = module.acm.cert_validation_details
+output "api_gateway_url" {
+  description = "The API Gateway endpoint URL"
+  value       = module.cognito.api_gateway_url
+}
+
+output "cognito_target_domain_name" {
+  value = module.cognito.target_domain_name
+}
+
+
+
+# output "target_group_arn" {
+#   type  = string
+#   value = module.alb.target_group_arn
+# }
+
+# output "alb_arn_suffix" {
+#   value = module.alb.arn_suffix
+# }
+
+# output "alb_target_group_arn_suffix" {
+#   value = module.alb.alb_target_group_arn_suffix
+# }
+
+
+output "api_gateway_id" {
+  value = module.cognito.api_gateway_id
+}
+
+output "vpc_link_id" {
+  value = module.cognito.vpc_link_id
+}
+
+output "authorizer_id" {
+  value = module.cognito.authorizer_id
 }

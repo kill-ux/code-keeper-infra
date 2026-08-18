@@ -1,7 +1,7 @@
 module "vpc_endpoints_sg" {
   source = "../modules/aws/security_group"
 
-  name        = "vpc_endpoints_sg"
+  name        = "vpc_endpoints_sg-${var.environment}"
   description = "Allow HTTPS from private subnets to VPC endpoints"
   vpc_id      = module.vpc.vpc_id
 
@@ -15,26 +15,26 @@ module "vpc_endpoints_sg" {
     }
   ]
 
-  tags = { "Name" : "vpc_endpoints_sg" }
+  tags = { "Name" : "vpc_endpoints_sg-${var.environment}" }
 }
 
 module "vpc" {
-  source              = "../modules/aws/vpc"
-  vpc_cidr            = var.vpc_cidr
-  aws_region          = var.aws_region
+  source     = "../modules/aws/vpc"
+  environment = var.environment
+  
+  vpc_cidr   = var.vpc_cidr
+  aws_region = var.aws_region
 }
 
 module "iam" {
   source = "../modules/aws/iam"
+  environment = var.environment
 }
-
-module "ecr" {
-  source = "../modules/aws/ecr"
-}
-
 
 module "secrets" {
   source            = "../modules/aws/secrets"
+  environment = var.environment
+
   rabbitmq_user     = var.rabbitmq_user
   rabbitmq_password = var.rabbitmq_password
 
@@ -47,7 +47,19 @@ module "secrets" {
   billing_db_name     = var.billing_db_name
 }
 
-module "acm" {
-  source = "../modules/aws/acm"
-  domain_name = "cloud.hansel.lol"
+
+module "cognito" {
+  source                  = "../modules/aws/cognito"
+  environment = var.environment
+
+  aws_region              = var.aws_region
+  # alb_dns_name            = module.alb.alb_dns_name
+  security_group_id       = module.aws_gateway_sg.id
+  private_subnet_ids      = [module.vpc.private_subnet_ids[0]]
+  # alb_listener_arn        = module.alb.alb_listener_arn
+
+  domain_name             = var.domain_name
+  cert_arn                = var.cert_arn
+  # cert_validation_details = module.acm.cert_validation_details
+  enable_custom_domain = var.enable_custom_domain
 }

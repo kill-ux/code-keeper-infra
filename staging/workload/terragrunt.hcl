@@ -24,13 +24,14 @@ inputs = {
   inventory_db_sg_id              = dependency.foundation.outputs.inventory_db_sg_id
   billing_sg_id                   = dependency.foundation.outputs.billing_sg_id
   billing_db_sg_id                = dependency.foundation.outputs.billing_db_sg_id
-  cert_arn                        = dependency.foundation.outputs.cert_arn
-  cert_validation_details         = dependency.foundation.outputs.cert_validation_details
   api_gateway_image               = local.api_gateway_image
   inventory_app_image             = local.inventory_app_image
   billing_app_image               = local.billing_app_image
   rabbitmq_image                  = local.rabbitmq_image
   postgres_db_image               = local.postgres_db_image
+  api_gateway_id                  = dependency.foundation.outputs.api_gateway_id
+  vpc_link_id                     = dependency.foundation.outputs.vpc_link_id
+  authorizer_id                   = dependency.foundation.outputs.authorizer_id
 }
 
 dependency "foundation" {
@@ -53,15 +54,7 @@ dependency "foundation" {
       "eu-west-3a", "eu-west-3b"
     ]
 
-    secrets_arn = "arn:aws:secretsmanager:eu-west-3:000000000000:secret:mock"
-    ecr_registry = {
-      "api-gateway" = "000000000000.dkr.ecr.eu-west-3.amazonaws.com/api-gateway"
-      "rabbitmq" = "000000000000.dkr.ecr.eu-west-3.amazonaws.com/rabbitmq"
-      "inventory-app" = "000000000000.dkr.ecr.eu-west-3.amazonaws.com/inventory-app"
-      "postgres-db" = "000000000000.dkr.ecr.eu-west-3.amazonaws.com/postgres-db"
-      "billing-app" = "000000000000.dkr.ecr.eu-west-3.amazonaws.com/billing-app"
-    }
-
+    secrets_arn        = "arn:aws:secretsmanager:eu-west-3:000000000000:secret:mock"
     aws_gateway_sg_id  = "sg-mock1"
     alb_sg_id          = "sg-mock2"
     ecs_instance_sg_id = "sg-mock3"
@@ -71,13 +64,6 @@ dependency "foundation" {
     inventory_db_sg_id = "sg-mock7"
     billing_sg_id      = "sg-mock8"
     billing_db_sg_id   = "sg-mock9"
-    cert_arn           = "arn:aws:acm:eu-west-3:000000000000:certificate/mock"
-    cert_validation_details = {
-      domain       = "cloud.hansel.lol"
-      record_name  = "_validation-record-will-be-known-during-apply"
-      record_type  = "CNAME"
-      record_value = "_validation-value-will-be-known-during-apply"
-    }
   }
 
   mock_outputs_allowed_terraform_commands = [

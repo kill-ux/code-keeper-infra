@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "cloud_design_cluster" {
-  name = "cloud-design-cluster"
+  name = "cloud-design-cluster-${var.environment}"
 
   setting {
     name  = "containerInsights"
@@ -10,7 +10,7 @@ resource "aws_ecs_cluster" "cloud_design_cluster" {
     namespace = var.service_discovery_namespace_arn
   }
 
-  tags = { "Name" = "cloud-design-cluster" }
+  tags = { "Name" = "cloud-design-cluster-${var.environment}" }
 }
 
 data "aws_ssm_parameter" "ecs_ami" {
@@ -18,7 +18,7 @@ data "aws_ssm_parameter" "ecs_ami" {
 }
 
 resource "aws_launch_template" "ecs_lt" {
-  name_prefix   = "cloud-design-ecs-"
+  name_prefix   = "cloud-design-ecs-${var.environment}-"
   image_id      = data.aws_ssm_parameter.ecs_ami.value
   instance_type = "t3.small"
 
@@ -30,15 +30,15 @@ resource "aws_launch_template" "ecs_lt" {
 
   user_data = base64encode(<<-EOF
       #!/bin/bash
-      echo ECS_CLUSTER=cloud-design-cluster >> /etc/ecs/ecs.config
+      echo ECS_CLUSTER=cloud-design-cluster-${var.environment} >> /etc/ecs/ecs.config
     EOF
   )
 
-  tags = { "Name" = "cloud-design-ecs-lt" }
+  tags = { "Name" = "cloud-design-ecs-lt-${var.environment}" }
 }
 
 resource "aws_autoscaling_group" "ecs_asg" {
-  name                = "cloud-design-ecs-asg"
+  name                = "cloud-design-ecs-asg-${var.environment}"
   desired_capacity    = var.desired_capacity
   min_size            = var.min_size
   max_size            = var.max_size
@@ -51,7 +51,7 @@ resource "aws_autoscaling_group" "ecs_asg" {
 
   tag {
     key                 = "Name"
-    value               = "cloud-design-ecs-instance"
+    value               = "cloud-design-ecs-instance-${var.environment}"
     propagate_at_launch = true
   }
 
@@ -61,7 +61,7 @@ resource "aws_autoscaling_group" "ecs_asg" {
 }
 
 resource "aws_ecs_capacity_provider" "cloud_design_cp" {
-  name = "cloud-design-capacity-provider"
+  name = "cloud-design-capacity-provider-${var.environment}"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs_asg.arn

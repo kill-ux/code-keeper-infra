@@ -75,7 +75,7 @@ module "api_gateway_service" {
     },
   ]
 
-  depends_on = [module.alb, module.billing_service, module.inventory_service]
+  depends_on = [module.billing_service, module.inventory_service]
 
   tags = { "Component" = "api" }
 }

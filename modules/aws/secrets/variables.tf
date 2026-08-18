@@ -45,3 +45,6 @@ variable "billing_db_name" {
   type        = string
 }
 
+variable "environment" {
+  
+}

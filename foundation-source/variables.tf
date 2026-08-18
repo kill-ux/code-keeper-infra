@@ -56,5 +56,16 @@ variable "billing_db_name" {
 
 variable "enable_custom_domain" {
   type = bool
-  default = false
+}
+
+variable "domain_name" {
+  
+}
+
+variable "cert_arn" {
+  
+}
+
+variable "environment" {
+  
 }

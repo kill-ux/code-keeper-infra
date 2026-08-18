@@ -93,12 +93,6 @@ variable "billing_db_sg_id" {
   type        = string
 }
 
-variable "cert_arn" {
-  description = "ARN of the SSL certificate"
-  type        = string
-}
-
-
 
 variable "api_gateway_image" {
   description = "Full Docker image reference for api-gateway (repo:tag)"
@@ -125,6 +119,20 @@ variable "postgres_db_image" {
   type        = string
 }
 
-variable "cert_validation_details" {
+variable "domain_name" {
+
+}
+
+variable "enable_custom_domain" {
+
+}
+
+variable "api_gateway_id" {}
+
+variable "vpc_link_id" {}
+
+variable "authorizer_id" {}
+
+variable "environment" {
   
 }

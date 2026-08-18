@@ -46,3 +46,7 @@ variable "device_name" {
   default     = ""
   type        = string
 }
+
+variable "environment" {
+  
+}

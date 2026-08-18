@@ -28,3 +28,7 @@ variable "device_name" {
   description = "Bare device suffix, e.g. sdh"
   type        = string
 }
+
+variable "environment" {
+  
+}

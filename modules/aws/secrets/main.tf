@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "cloud_design_credentials" {
-  name                    = "cloud-design"
+  name                    = "cloud-design-${var.environment}"
   recovery_window_in_days = 0
 }
 

@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ecs_instance_role" {
-  name = "cloud-design-ecs-instance-role"
+  name = "cloud-design-ecs-instance-role-${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -13,7 +13,7 @@ resource "aws_iam_role" "ecs_instance_role" {
     ]
   })
 
-  tags = { "Name" = "cloud-design-ecs-instance-role" }
+  tags = { "Name" = "cloud-design-ecs-instance-role-${var.environment}" }
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_policy" {
@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "name" {
 }
 
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  name = "cloud-design-ecs-instance-profile"
+  name = "cloud-design-ecs-instance-profile-${var.environment}"
   role = aws_iam_role.ecs_instance_role.name
 }
 
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "ecs_assume_role" {
 }
 
 resource "aws_iam_role" "ecs_execution_role" {
-  name               = "cloud-design-ecs-execution-role"
+  name               = "cloud-design-ecs-execution-role-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role.json
 }
 
@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_service_connect_policy" {
-  name = "ecs-task-service-connect-policy"
+  name = "ecs-task-service-connect-policy-${var.environment}"
   role = aws_iam_role.ecs_execution_role.id
 
   policy = jsonencode({

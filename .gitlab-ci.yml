@@ -23,7 +23,7 @@ init:
   script:
     - |
       set -eu
-      for environment in staging; do
+      for environment in staging production; do
         echo "Init ${environment}"
 
         terragrunt run --all \
@@ -37,7 +37,7 @@ validate:
   script:
     - |
       set -eu
-      for environment in staging; do 
+      for environment in staging production; do 
         echo "Validating ${environment}"
 
         terragrunt run --all \

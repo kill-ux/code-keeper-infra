@@ -1,15 +1,15 @@
 resource "aws_lb" "cloud_design_alb" {
-  name               = "cloud-design-alb"
+  name               = "cloud-design-alb-${var.environment}"
   internal           = var.enable_custom_domain
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
   subnets            = var.enable_custom_domain ? var.private_subnet_ids : var.public_subnet_ids
 
-  tags = { "Name" = "cloud-design-alb" }
+  tags = { "Name" = "cloud-design-alb-${var.environment}" }
 }
 
 resource "aws_lb_target_group" "cloud_design_gateway_tg" {
-  name        = "cloud-design-gateway-tg"
+  name        = "cloud-design-gateway-tg-${var.environment}"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -26,7 +26,7 @@ resource "aws_lb_target_group" "cloud_design_gateway_tg" {
     unhealthy_threshold = 2
   }
 
-  tags = { "Name" = "cloud-design-gateway-tg" }
+  tags = { "Name" = "cloud-design-gateway-tg-${var.environment}" }
 }
 
 
@@ -40,5 +40,5 @@ resource "aws_lb_listener" "alb_listener" {
     target_group_arn = aws_lb_target_group.cloud_design_gateway_tg.arn
   }
 
-  tags = { "Name" = "cloud-design-http-listener" }
+  tags = { "Name" = "cloud-design-http-listener-${var.environment}" }
 }

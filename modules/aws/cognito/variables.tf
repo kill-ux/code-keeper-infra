@@ -2,10 +2,6 @@ variable "aws_region" {
   type = string
 }
 
-variable "alb_dns_name" {
-  description = "The public DNS URL of the Load Balancer"
-  type        = string
-}
 
 variable "security_group_id" {
   type = string
@@ -15,9 +11,6 @@ variable "private_subnet_ids" {
   type = list(string)
 }
 
-variable "alb_listener_arn" {
-  type = string
-}
 
 variable "domain_name" {
   type = string
@@ -29,16 +22,8 @@ variable "cert_arn" {
 
 variable "enable_custom_domain" {
   type    = bool
-  default = false
 }
 
-variable "cert_validation_details" {
-  description = "Certificate validation details"
-  type = object({
-    domain       = string
-    record_name  = string
-    record_type  = string
-    record_value = string
-  })
-  default = null
+variable "environment" {
+  
 }

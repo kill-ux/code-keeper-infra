@@ -1,13 +1,3 @@
-data "terraform_remote_state" "foundation" {
-  backend = "s3"
-  config = {
-    bucket = "cloud-design-tfstate-969209892845-eu-west-3-an"
-    key    = "foundation/terraform.tfstate"
-    region = "eu-west-3"
-  }
-
-}
-
 locals {
   vpc_id                          = var.vpc_id
   private_subnet_ids              = var.private_subnet_ids
@@ -18,30 +8,21 @@ locals {
   private_subnet_azs              = var.private_subnet_azs
   secrets_arn                     = var.secrets_arn
 
-  aws_gateway_sg_id  = var.aws_gateway_sg_id
-  alb_sg_id          = var.alb_sg_id
-  ecs_instance_sg_id = var.ecs_instance_sg_id
-  gateway_sg_id      = var.gateway_sg_id
-  rabbitmq_sg_id     = var.rabbitmq_sg_id
-  inventory_sg_id    = var.inventory_sg_id
-  inventory_db_sg_id = var.inventory_db_sg_id
-  billing_sg_id      = var.billing_sg_id
-  billing_db_sg_id   = var.billing_db_sg_id
-  cert_validation_details = jsondecode(var.cert_validation_details)
-
-  cert_arn = var.cert_arn
-}
-
-module "alb" {
-  source             = "../modules/aws/alb"
-  alb_sg_id          = local.alb_sg_id
-  private_subnet_ids = local.private_subnet_ids
-  public_subnet_ids  = local.public_subnet_ids
-  vpc_id             = local.vpc_id
+  aws_gateway_sg_id       = var.aws_gateway_sg_id
+  alb_sg_id               = var.alb_sg_id
+  ecs_instance_sg_id      = var.ecs_instance_sg_id
+  gateway_sg_id           = var.gateway_sg_id
+  rabbitmq_sg_id          = var.rabbitmq_sg_id
+  inventory_sg_id         = var.inventory_sg_id
+  inventory_db_sg_id      = var.inventory_db_sg_id
+  billing_sg_id           = var.billing_sg_id
+  billing_db_sg_id        = var.billing_db_sg_id
 }
 
 module "ecs" {
   source                          = "../modules/aws/ecs"
+  environment = var.environment
+
   ecs_execution_role_arn          = local.ecs_execution_role_arn
   ecs_instance_profile_name       = local.ecs_instance_profile_name
   ecs_instance_sg_id              = local.ecs_instance_sg_id
@@ -55,6 +36,8 @@ module "ecs" {
 
 module "inventory_db_instance" {
   source                    = "../modules/aws/ecs_db_instance"
+  environment = var.environment
+
   host_name                 = "inventory-db"
   iam_instance_profile_name = local.ecs_instance_profile_name
   security_group_id         = local.ecs_instance_sg_id
@@ -70,11 +53,13 @@ module "inventory_db_volume" {
   ebs_size          = 10
   ebs_type          = "gp3"
   instance_id       = module.inventory_db_instance.instance_id
-  tags              = { Name = "inventory-db-volume" }
+  tags              = { Name = "inventory-db-volume-${var.environment}" }
 }
 
 module "billing_db_instance" {
   source                    = "../modules/aws/ecs_db_instance"
+  environment = var.environment
+
   host_name                 = "billing-db"
   iam_instance_profile_name = local.ecs_instance_profile_name
   security_group_id         = local.ecs_instance_sg_id
@@ -93,25 +78,16 @@ module "billing_db_volume" {
   tags              = { Name = "billing_db_volume" }
 }
 
-module "cognito" {
-  source             = "../modules/aws/cognito"
-  aws_region         = var.aws_region
-  alb_dns_name       = module.alb.alb_dns_name
-  security_group_id  = local.aws_gateway_sg_id
-  private_subnet_ids = [local.private_subnet_ids[0]]
-  alb_listener_arn   = module.alb.alb_listener_arn
-  domain_name        = "cloud.hansel.lol"
-  cert_arn           = local.cert_arn
-  cert_validation_details = local.cert_validation_details
-}
 
 module "dashboard" {
   source           = "../modules/aws/dashboard"
+  environment = var.environment
+
   ecs_cluster_name = module.ecs.cluster_name
 }
 
 resource "aws_budgets_budget" "monthly_cost_alert" {
-  name         = "monthly-budget-alert"
+  name         = "monthly-budget-alert-${var.environment}"
   budget_type  = "COST"
   limit_amount = "50"
   limit_unit   = "USD"
@@ -124,4 +100,24 @@ resource "aws_budgets_budget" "monthly_cost_alert" {
     notification_type          = "ACTUAL"
     subscriber_email_addresses = ["mustaphaboutoubdev@gmail.com"]
   }
+}
+
+module "alb" {
+  source             = "../modules/aws/alb"
+  environment = var.environment
+  
+  alb_sg_id          = local.alb_sg_id
+  private_subnet_ids = local.private_subnet_ids
+  public_subnet_ids  = local.public_subnet_ids
+  vpc_id             = local.vpc_id
+
+  enable_custom_domain = var.enable_custom_domain
+}
+
+module "integration" {
+  source           = "../modules/aws/integration"
+  alb_listener_arn = module.alb.alb_listener_arn
+  api_gateway_id   = var.api_gateway_id
+  vpc_link_id      = var.vpc_link_id
+  authorizer_id    = var.authorizer_id
 }
