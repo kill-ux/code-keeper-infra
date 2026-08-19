@@ -94,4 +94,5 @@ apply_staging:
       set -eu
 
       terragrunt apply --all \
-      --working-dir staging
+      --working-dir staging \
+       -auto-approve
