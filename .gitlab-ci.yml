@@ -115,7 +115,7 @@ destroy_staging:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt destroy --working-dir staging/workload
+    - terragrunt destroy --working-dir staging/workload -auto-approve
 
 destroy_production:
   stage: destroy
@@ -124,4 +124,4 @@ destroy_production:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt destroy --working-dir production/workload
+    - terragrunt destroy --working-dir production/workload -auto-approve
