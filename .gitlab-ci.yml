@@ -1,5 +1,5 @@
 image:
-  name: gruntwork-io/terragrunt:1.9.6-alpine
+  name: alpine/terragrunt:1.8.4
   entrypoint: [""]
 
 stages:
