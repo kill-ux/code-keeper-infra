@@ -354,5 +354,7 @@ module "billing_db_service" {
       valueFrom = "${local.secrets_arn}:billing_db_name::"
     }
   ]
+
+  depends_on = [ module.alb.alb_listener ]
 }
 

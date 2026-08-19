@@ -82,6 +82,7 @@ plan_production:
 
 apply_staging:
   stage: apply_staging
+  timeout: 30m
   needs:
     - job: plan_staging
       artifacts: true
@@ -95,6 +96,7 @@ apply_staging:
 
 apply_production:
   stage: apply_production
+  timeout: 30m
   needs:
     - job: plan_production
     - job: apply_staging

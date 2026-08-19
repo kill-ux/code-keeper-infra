@@ -21,3 +21,7 @@ output "alb_target_group_arn_suffix" {
 output "alb_listener_arn" {
   value = aws_lb_listener.alb_listener.arn
 }
+
+output "alb_listener" {
+  value = aws_lb_listener.alb_listener
+}
