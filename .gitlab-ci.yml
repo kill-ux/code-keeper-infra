@@ -49,22 +49,26 @@ plan_staging:
   needs:
     - validate_staging
   script:
-    - terragrunt plan --all --working-dir staging -out="$CI_PROJECT_DIR/staging.tfplan"
+    - terragrunt plan --working-dir staging/foundation -out="$CI_PROJECT_DIR/staging.foundation.tfplan"
+    - terragrunt plan --working-dir staging/workload -out="$CI_PROJECT_DIR/staging.workload.tfplan"
   artifacts:
     expire_in: 1 week
     paths:
-      - staging.tfplan
+      - staging.foundation.tfplan
+      - staging.workload.tfplan
 
 plan_production:
   stage: plan
   needs:
     - validate_production
   script:
-    - terragrunt plan --all --working-dir production -out="$CI_PROJECT_DIR/production.tfplan"
+    - terragrunt plan --working-dir production/foundation -out="$CI_PROJECT_DIR/production.foundation.tfplan"
+    - terragrunt plan --working-dir production/workload -out="$CI_PROJECT_DIR/production.workload.tfplan"
   artifacts:
     expire_in: 1 week
     paths:
-      - production.tfplan
+      - production.foundation.tfplan
+      - production.workload.tfplan
 
 apply_staging:
   stage: apply_staging
@@ -76,7 +80,8 @@ apply_staging:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --all --working-dir staging "$CI_PROJECT_DIR/staging.tfplan"
+    - terragrunt apply --working-dir staging/foundation "$CI_PROJECT_DIR/staging.foundation.tfplan"
+    - terragrunt apply --working-dir staging/workload "$CI_PROJECT_DIR/staging.workload.tfplan"
 
 apply_production:
   stage: apply_production
@@ -89,7 +94,8 @@ apply_production:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --all --working-dir production "$CI_PROJECT_DIR/production.tfplan"
+    - terragrunt apply --working-dir production/foundation "$CI_PROJECT_DIR/production.foundation.tfplan"
+    - terragrunt apply --working-dir production/workload "$CI_PROJECT_DIR/production.workload.tfplan"
 
 destroy_staging:
   stage: destroy
@@ -99,3 +105,14 @@ destroy_staging:
       when: manual
   script:
     - terragrunt destroy --working-dir staging/workload
+    - terragrunt destroy --working-dir staging/foundation
+
+destroy_production:
+  stage: destroy
+  resource_group: terraform-production
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
+      when: manual
+  script:
+    - terragrunt destroy --working-dir production/workload
+    - terragrunt destroy --working-dir production/foundation
