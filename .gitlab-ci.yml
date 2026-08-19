@@ -24,11 +24,15 @@ init_staging:
   stage: init
   script:
     - terragrunt run --all --working-dir staging init
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 init_production:
   stage: init
   script:
     - terragrunt run --all --working-dir production init
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 validate_staging:
   stage: validate
@@ -36,6 +40,8 @@ validate_staging:
     - init_staging
   script:
     - terragrunt run --all --working-dir staging validate
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 validate_production:
   stage: validate
@@ -43,6 +49,8 @@ validate_production:
     - init_production
   script:
     - terragrunt run --all --working-dir production validate
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 plan_staging:
   stage: plan
@@ -55,6 +63,8 @@ plan_staging:
     expire_in: 1 week
     paths:
       - staging.foundation.tfplan
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 plan_production:
   stage: plan
@@ -67,6 +77,8 @@ plan_production:
     expire_in: 1 week
     paths:
       - production.foundation.tfplan
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
 
 apply_staging:
   stage: apply_staging
@@ -91,8 +103,8 @@ apply_production:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --working-dir production/foundation "$CI_PROJECT_DIR/production.foundation.tfplan"
-    - terragrunt apply --working-dir production/workload
+    - terragrunt apply --working-dir production/foundation -auto-approve "$CI_PROJECT_DIR/production.foundation.tfplan"
+    - terragrunt apply --working-dir production/workload -auto-approve
 
 destroy_staging:
   stage: destroy
@@ -107,7 +119,7 @@ destroy_production:
   stage: destroy
   resource_group: terraform-production
   rules:
-  - if: "$CI_COMMIT_REF_PROTECTED"
-    when: manual
+    - if: "$CI_COMMIT_REF_PROTECTED"
+      when: manual
   script:
     - terragrunt destroy --working-dir production/workload
