@@ -1,5 +1,6 @@
 image:
-  name: alpine/terragrunt:1.8.4
+  name: alpine/terragrunt:tf1.15.8
+
   entrypoint: [""]
 
 stages:
