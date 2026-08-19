@@ -62,7 +62,7 @@ plan_production:
     - validate_production
   script:
     - terragrunt plan --working-dir production/foundation -out="$CI_PROJECT_DIR/production.foundation.tfplan"
-    - terragrunt plan --working-dir production
+    - terragrunt plan --working-dir production/workload
   artifacts:
     expire_in: 1 week
     paths:
