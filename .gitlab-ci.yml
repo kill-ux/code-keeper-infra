@@ -49,25 +49,37 @@ plan_staging:
   needs:
     - validate_staging
   script:
-    - terragrunt plan --all --working-dir staging/workload
+    - terragrunt plan --working-dir staging/foundation -out="$CI_PROJECT_DIR/staging.foundation.tfplan"
+    - terragrunt plan --working-dir staging/workload
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - staging.foundation.tfplan
 
 plan_production:
   stage: plan
   needs:
     - validate_production
   script:
-    - terragrunt plan --all --working-dir production
+    - terragrunt plan --working-dir production/foundation -out="$CI_PROJECT_DIR/production.foundation.tfplan"
+    - terragrunt plan --working-dir production
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - production.foundation.tfplan
 
 apply_staging:
   stage: apply_staging
   needs:
     - job: plan_staging
+      artifacts: true
   resource_group: terraform-staging
   rules:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --all --working-dir staging
+    - terragrunt apply --working-dir staging/foundation "$CI_PROJECT_DIR/staging.foundation.tfplan"
+    - terragrunt apply --working-dir staging/workload
 
 apply_production:
   stage: apply_production
@@ -79,7 +91,8 @@ apply_production:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --all --working-dir production
+    - terragrunt apply --working-dir production/foundation "$CI_PROJECT_DIR/production.foundation.tfplan"
+    - terragrunt apply --working-dir production/workload
 
 destroy_staging:
   stage: destroy
