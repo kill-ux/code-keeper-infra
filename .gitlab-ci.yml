@@ -56,10 +56,24 @@ plan_staging:
 
       terragrunt plan --all \
         --working-dir staging \
-        -out="$CI_PROJECT_DIR/staging.tfplan" \
-      
+        -out="$CI_PROJECT_DIR/staging.tfplan"
   artifacts:
-    when: always
     expire_in: 1 week
     paths:
       - staging.tfplan
+
+plan_production:
+  stage: plan
+  needs:
+    - validate
+  script:
+    - |
+      set -eu
+
+      terragrunt plan --all
+        --working-dir production
+        -out="$CI_PROJECT_DIR/production.tfplan"
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - production.tfplan

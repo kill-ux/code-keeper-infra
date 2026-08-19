@@ -1,6 +1,7 @@
 # API Gateway
 module "api_gateway_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "api-gateway"
   container_image = var.api_gateway_image
@@ -84,6 +85,7 @@ module "api_gateway_service" {
 # RabbitMQ
 module "rabbitmq_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "rabbitmq"
   container_image = var.rabbitmq_image
@@ -120,6 +122,7 @@ module "rabbitmq_service" {
 
 module "inventory_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "inventory"
   container_image = var.inventory_app_image
@@ -181,6 +184,7 @@ module "inventory_service" {
 
 module "inventory_db_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "inventory-db"
   container_image = var.postgres_db_image
@@ -195,8 +199,8 @@ module "inventory_db_service" {
   execution_role_arn              = local.ecs_execution_role_arn
   service_discovery_namespace_arn = local.service_discovery_namespace_arn
 
-  enable_ebs_mounts               = true
-  placement_constraint_expression = "attribute:role == ${module.inventory_db_instance.placement_attribute}"
+  # enable_ebs_mounts               = true
+  # placement_constraint_expression = "attribute:role == ${module.inventory_db_instance.placement_attribute}"
 
   subnets         = local.private_subnet_ids
   security_groups = [local.inventory_db_sg_id]
@@ -204,7 +208,7 @@ module "inventory_db_service" {
   cpu                      = 128
   memory                   = 256
   desired_count            = 1
-  enable_distinct_instance = true
+  # enable_distinct_instance = true
 
   secrets = [
     {
@@ -225,6 +229,7 @@ module "inventory_db_service" {
 
 module "billing_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "billing"
   container_image = var.billing_app_image
@@ -309,6 +314,7 @@ module "billing_service" {
 
 module "billing_db_service" {
   source = "../modules/aws/ecs_task"
+  environment = var.environment
 
   task_name       = "billing-db"
   container_image = var.postgres_db_image
@@ -329,10 +335,10 @@ module "billing_db_service" {
   cpu                      = 128
   memory                   = 256
   desired_count            = 1
-  enable_distinct_instance = true
+  # enable_distinct_instance = true
 
-  enable_ebs_mounts               = true
-  placement_constraint_expression = "attribute:role == ${module.billing_db_instance.placement_attribute}"
+  # enable_ebs_mounts               = true
+  # placement_constraint_expression = "attribute:role == ${module.billing_db_instance.placement_attribute}"
 
   secrets = [
     {

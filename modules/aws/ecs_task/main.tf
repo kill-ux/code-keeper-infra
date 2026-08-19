@@ -1,9 +1,9 @@
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "task_logs" {
-  name              = "/ecs/${var.task_name}"
+  name              = "/ecs/${var.task_name}-${var.environment}"
   retention_in_days = var.log_retention_days
-  tags              = merge(var.tags, { "Name" = "${var.task_name}-logs" })
+  tags              = merge(var.tags, { "Name" = "${var.task_name}-logs--${var.environment}" })
 }
 
 # Task Definition
@@ -69,13 +69,13 @@ resource "aws_ecs_task_definition" "task" {
     }
   }
 
-  tags = merge(var.tags, { "Name" = "${var.task_name}-task-def" })
+  tags = merge(var.tags, { "Name" = "${var.task_name}-task-def-${var.environment}" })
 }
 
 
 # ECS Service
 resource "aws_ecs_service" "service" {
-  name                               = "${var.task_name}-service"
+  name                               = "${var.task_name}-service-${var.environment}"
   cluster                            = var.cluster_id
   task_definition                    = aws_ecs_task_definition.task.arn
   desired_count                      = var.desired_count
@@ -134,7 +134,7 @@ resource "aws_ecs_service" "service" {
     }
   }
 
-  tags = merge(var.tags, { "Name" = "${var.task_name}-service" })
+  tags = merge(var.tags, { "Name" = "${var.task_name}-service-${var.environment}" })
 
   depends_on = [aws_cloudwatch_log_group.task_logs, aws_ecs_task_definition.task]
 }

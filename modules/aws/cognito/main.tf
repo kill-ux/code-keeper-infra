@@ -11,6 +11,10 @@ resource "aws_cognito_user_pool" "pool" {
       priority = 1
     }
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # App Client
@@ -23,12 +27,20 @@ resource "aws_cognito_user_pool_client" "client" {
     "ALLOW_USER_PASSWORD_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH"
   ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # HTTP API Gateway
 resource "aws_apigatewayv2_api" "gateway" {
   name          = "cloud-design-http-api-${var.environment}"
   protocol_type = "HTTP"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Auto-deploying Stage
@@ -36,6 +48,10 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.gateway.id
   name        = "$default"
   auto_deploy = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # JWT Authorizer
@@ -49,12 +65,20 @@ resource "aws_apigatewayv2_authorizer" "cognito_auth" {
     audience = [aws_cognito_user_pool_client.client.id]
     issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.pool.id}"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_apigatewayv2_vpc_link" "alb_link" {
   name               = "api-gateway-vpc-link-${var.environment}"
   security_group_ids = [var.security_group_id]
   subnet_ids         = var.private_subnet_ids
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_apigatewayv2_domain_name" "custom_domain" {
@@ -65,6 +89,10 @@ resource "aws_apigatewayv2_domain_name" "custom_domain" {
     endpoint_type   = "REGIONAL"
     security_policy = "TLS_1_2"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_apigatewayv2_api_mapping" "mapping" {
@@ -72,4 +100,8 @@ resource "aws_apigatewayv2_api_mapping" "mapping" {
   api_id      = aws_apigatewayv2_api.gateway.id
   domain_name = aws_apigatewayv2_domain_name.custom_domain[0].id
   stage       = aws_apigatewayv2_stage.default.id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }

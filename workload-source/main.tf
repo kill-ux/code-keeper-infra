@@ -28,55 +28,55 @@ module "ecs" {
   ecs_instance_sg_id              = local.ecs_instance_sg_id
   private_subnet_ids              = local.private_subnet_ids
   public_subnet_ids               = local.public_subnet_ids
-  desired_capacity                = 4
-  min_size                        = 4
+  desired_capacity                = 3
+  min_size                        = 3
   max_size                        = 8
   service_discovery_namespace_arn = local.service_discovery_namespace_arn
 }
 
-module "inventory_db_instance" {
-  source                    = "../modules/aws/ecs_db_instance"
-  environment = var.environment
+# module "inventory_db_instance" {
+#   source                    = "../modules/aws/ecs_db_instance"
+#   environment = var.environment
 
-  host_name                 = "inventory-db"
-  iam_instance_profile_name = local.ecs_instance_profile_name
-  security_group_id         = local.ecs_instance_sg_id
-  subnet_id                 = local.private_subnet_ids[0]
-  cluster_name              = module.ecs.cluster_name
-  device_name               = "sdh"
-}
+#   host_name                 = "inventory-db"
+#   iam_instance_profile_name = local.ecs_instance_profile_name
+#   security_group_id         = local.ecs_instance_sg_id
+#   subnet_id                 = local.private_subnet_ids[0]
+#   cluster_name              = module.ecs.cluster_name
+#   device_name               = "sdh"
+# }
 
-module "inventory_db_volume" {
-  source            = "../modules/aws/ebs"
-  device_name       = "/dev/sdh"
-  availability_zone = local.private_subnet_azs[0]
-  ebs_size          = 10
-  ebs_type          = "gp3"
-  instance_id       = module.inventory_db_instance.instance_id
-  tags              = { Name = "inventory-db-volume-${var.environment}" }
-}
+# module "inventory_db_volume" {
+#   source            = "../modules/aws/ebs"
+#   device_name       = "/dev/sdh"
+#   availability_zone = local.private_subnet_azs[0]
+#   ebs_size          = 10
+#   ebs_type          = "gp3"
+#   instance_id       = module.inventory_db_instance.instance_id
+#   tags              = { Name = "inventory-db-volume-${var.environment}" }
+# }
 
-module "billing_db_instance" {
-  source                    = "../modules/aws/ecs_db_instance"
-  environment = var.environment
+# module "billing_db_instance" {
+#   source                    = "../modules/aws/ecs_db_instance"
+#   environment = var.environment
 
-  host_name                 = "billing-db"
-  iam_instance_profile_name = local.ecs_instance_profile_name
-  security_group_id         = local.ecs_instance_sg_id
-  subnet_id                 = local.private_subnet_ids[0]
-  cluster_name              = module.ecs.cluster_name
-  device_name               = "sdi"
-}
+#   host_name                 = "billing-db"
+#   iam_instance_profile_name = local.ecs_instance_profile_name
+#   security_group_id         = local.ecs_instance_sg_id
+#   subnet_id                 = local.private_subnet_ids[0]
+#   cluster_name              = module.ecs.cluster_name
+#   device_name               = "sdi"
+# }
 
-module "billing_db_volume" {
-  source            = "../modules/aws/ebs"
-  device_name       = "/dev/sdi"
-  availability_zone = local.private_subnet_azs[0]
-  ebs_size          = 10
-  ebs_type          = "gp3"
-  instance_id       = module.billing_db_instance.instance_id
-  tags              = { Name = "billing_db_volume" }
-}
+# module "billing_db_volume" {
+#   source            = "../modules/aws/ebs"
+#   device_name       = "/dev/sdi"
+#   availability_zone = local.private_subnet_azs[0]
+#   ebs_size          = 10
+#   ebs_type          = "gp3"
+#   instance_id       = module.billing_db_instance.instance_id
+#   tags              = { Name = "billing_db_volume" }
+# }
 
 
 module "dashboard" {

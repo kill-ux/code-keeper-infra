@@ -6,7 +6,7 @@ inputs = {
 }
 
 locals {
-  environment   = "production"
+  environment   = "prod"
   instance_type = "t3.small"
   domain_name   = "cloud.wecode.ma"
 }

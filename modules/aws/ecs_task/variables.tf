@@ -201,3 +201,8 @@ variable "placement_constraint_expression" {
   type        = string
   default     = ""
 }
+
+
+variable "environment" {
+  
+}
