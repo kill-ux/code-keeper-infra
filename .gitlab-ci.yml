@@ -1,5 +1,5 @@
 image:
-  name: alpine/terragrunt:latest
+  name: gruntwork-io/terragrunt:1.9.6-alpine
   entrypoint: [""]
 
 stages:
@@ -70,8 +70,8 @@ plan_production:
     - |
       set -eu
 
-      terragrunt plan --all
-        --working-dir production
+      terragrunt plan --all \
+        --working-dir production \
         -out="$CI_PROJECT_DIR/production.tfplan"
   artifacts:
     expire_in: 1 week
