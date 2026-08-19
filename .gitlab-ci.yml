@@ -1,6 +1,5 @@
 image:
   name: alpine/terragrunt:tf1.15.8
-
   entrypoint: [""]
 
 stages:
@@ -78,3 +77,21 @@ plan_production:
     expire_in: 1 week
     paths:
       - production.tfplan
+
+apply_staging:
+  stage: apply_staging
+  needs:
+    - job: plan_staging
+      artifacts: true
+  resource_group: terraform-staging
+  environment:
+    name: staging
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED'
+      when: manual
+  script:
+    - |
+      set -eu
+
+      terragrunt apply --all \
+      --working-dir staging
