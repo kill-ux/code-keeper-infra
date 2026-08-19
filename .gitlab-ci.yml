@@ -78,8 +78,8 @@ apply_staging:
     - if: "$CI_COMMIT_REF_PROTECTED"
       when: manual
   script:
-    - terragrunt apply --working-dir staging/foundation "$CI_PROJECT_DIR/staging.foundation.tfplan"
-    - terragrunt apply --working-dir staging/workload
+    - terragrunt apply --working-dir staging/foundation -auto-approve "$CI_PROJECT_DIR/staging.foundation.tfplan"
+    - terragrunt apply --working-dir staging/workload -auto-approve
 
 apply_production:
   stage: apply_production
