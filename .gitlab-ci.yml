@@ -123,7 +123,7 @@ apply_production:
     - job: plan_production
     - job: apply_staging
   variables:
-    TG_WORKING_DIR: staging
+    TG_WORKING_DIR: production
   before_script:
     - !reference [.bootstrap_check, before_script]
   resource_group: terraform-production

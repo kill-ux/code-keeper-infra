@@ -10,7 +10,7 @@
         "iam": "Admin",
         "ebs": "Migrations",
         "ecs_db_instance": "Database",
-        "cognito" : "admin",
+        "cognito": "admin",
         "ecs_task": "Custom",
         "security_group": "Core",
         "dashboard": "review",
@@ -20,5 +20,5 @@
         "_envcommon": "Api",
         "staging": "Atom",
         "production": "store"
-    },
+    }
 }
