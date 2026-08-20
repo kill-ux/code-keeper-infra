@@ -127,12 +127,12 @@ module "inventory_service" {
   environment = var.environment
   bootstrap = var.bootstrap
 
-  task_name       = "inventory"
+  task_name       = "inventory-app"
   container_image = var.inventory_app_image
   container_port  = 8080
-  port_name       = "inventory"
-  discovery_name  = "inventory"
-  dns_name        = "inventory"
+  port_name       = "inventory-app"
+  discovery_name  = "inventory-app"
+  dns_name        = "inventory-app"
 
   cluster_id                      = module.ecs.cluster_id
   cluster_name                    = module.ecs.cluster_name
@@ -236,12 +236,12 @@ module "billing_service" {
   environment = var.environment
   bootstrap = var.bootstrap
 
-  task_name       = "billing"
+  task_name       = "billing-app"
   container_image = var.billing_app_image
   container_port  = 8080
-  port_name       = "billing"
-  discovery_name  = "billing"
-  dns_name        = "billing"
+  port_name       = "billing-app"
+  discovery_name  = "billing-app"
+  dns_name        = "billing-app"
 
   cluster_id                      = module.ecs.cluster_id
   cluster_name                    = module.ecs.cluster_name
