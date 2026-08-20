@@ -6,10 +6,7 @@ resource "aws_cloudwatch_log_group" "task_logs" {
   tags              = merge(var.tags, { "Name" = "${var.task_name}-logs--${var.environment}" })
 }
 
-variable "bootstrap" {
-  type    = bool
-  default = false
-}
+
 
 data "aws_ecs_task_definition" "current" {
   count           = var.bootstrap ? 0 : 1

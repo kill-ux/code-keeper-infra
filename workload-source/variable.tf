@@ -136,3 +136,8 @@ variable "authorizer_id" {}
 variable "environment" {
   
 }
+
+variable "bootstrap" {
+  type    = bool
+  default = false
+}

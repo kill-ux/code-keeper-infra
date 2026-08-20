@@ -206,3 +206,8 @@ variable "placement_constraint_expression" {
 variable "environment" {
   
 }
+
+variable "bootstrap" {
+  type    = bool
+  default = false
+}

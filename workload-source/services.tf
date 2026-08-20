@@ -2,6 +2,7 @@
 module "api_gateway_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "api-gateway"
   container_image = var.api_gateway_image
@@ -86,6 +87,7 @@ module "api_gateway_service" {
 module "rabbitmq_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "rabbitmq"
   container_image = var.rabbitmq_image
@@ -123,6 +125,7 @@ module "rabbitmq_service" {
 module "inventory_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "inventory"
   container_image = var.inventory_app_image
@@ -185,6 +188,7 @@ module "inventory_service" {
 module "inventory_db_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "inventory-db"
   container_image = var.postgres_db_image
@@ -230,6 +234,7 @@ module "inventory_db_service" {
 module "billing_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "billing"
   container_image = var.billing_app_image
@@ -315,6 +320,7 @@ module "billing_service" {
 module "billing_db_service" {
   source = "../modules/aws/ecs_task"
   environment = var.environment
+  bootstrap = var.bootstrap
 
   task_name       = "billing-db"
   container_image = var.postgres_db_image
