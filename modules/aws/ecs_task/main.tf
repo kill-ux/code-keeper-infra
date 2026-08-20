@@ -6,9 +6,23 @@ resource "aws_cloudwatch_log_group" "task_logs" {
   tags              = merge(var.tags, { "Name" = "${var.task_name}-logs--${var.environment}" })
 }
 
+variable "bootstrap" {
+  type    = bool
+  default = false
+}
+
+data "aws_ecs_task_definition" "current" {
+  count           = var.bootstrap ? 0 : 1
+  task_definition = "${var.task_name}-${var.environment}"
+}
+
+locals {
+  current_image = var.bootstrap ? var.container_image : jsondecode(data.aws_ecs_task_definition.current[0].container_definitions)[0].image
+}
+
 # Task Definition
 resource "aws_ecs_task_definition" "task" {
-  family                   = var.task_name
+  family                   = "${var.task_name}-${var.environment}"
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
   cpu                      = var.cpu
@@ -21,7 +35,7 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions = jsonencode([
     {
       name      = var.container_name != "" ? var.container_name : var.task_name
-      image     = var.container_image
+      image     = local.current_image
       cpu       = var.cpu
       memory    = var.memory
       essential = true
@@ -79,11 +93,10 @@ resource "aws_ecs_service" "service" {
   cluster                            = var.cluster_id
   task_definition                    = aws_ecs_task_definition.task.arn
   desired_count                      = var.desired_count
-  force_new_deployment               = true
-  deployment_maximum_percent         = 100
-  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
   # availability_zone_rebalancing      = "DISABLED"
-  force_delete = true
+  # force_delete = true
 
   launch_type = var.placement_constraint_expression != "" ? "EC2" : null
 
@@ -137,6 +150,10 @@ resource "aws_ecs_service" "service" {
   tags = merge(var.tags, { "Name" = "${var.task_name}-service-${var.environment}" })
 
   depends_on = [aws_cloudwatch_log_group.task_logs, aws_ecs_task_definition.task]
+
+  # lifecycle {
+  #   ignore_changes = [ task_definition ]
+  # }
 }
 
 # Data source for current region

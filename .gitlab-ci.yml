@@ -52,10 +52,24 @@ validate_production:
   rules:
     - if: "$CI_COMMIT_REF_PROTECTED"
 
+.bootstrap_check:
+  before_script: 
+    - |
+      if terragrunt state list --working-dir ${TG_WORKING_DIR}/workload 2>/dev/null | grep -q "aws_ecs_task_definition.task"; then
+        export TF_VAR_bootstrap=false
+      else
+        export TF_VAR_bootstrap=true
+      fi
+
+
 plan_staging:
   stage: plan
   needs:
     - validate_staging
+  variables:
+    TG_WORKING_DIR: staging
+  before_script:
+    - !reference [.bootstrap_check, before_script]
   script:
     - terragrunt plan --working-dir staging/foundation -out="$CI_PROJECT_DIR/staging.foundation.tfplan"
     - terragrunt plan --working-dir staging/workload
@@ -70,6 +84,10 @@ plan_production:
   stage: plan
   needs:
     - validate_production
+  variables:
+    TG_WORKING_DIR: production
+  before_script:
+    - !reference [.bootstrap_check, before_script]
   script:
     - terragrunt plan --working-dir production/foundation -out="$CI_PROJECT_DIR/production.foundation.tfplan"
     - terragrunt plan --working-dir production/workload
@@ -86,13 +104,17 @@ apply_staging:
   needs:
     - job: plan_staging
       artifacts: true
+  variables:
+    TG_WORKING_DIR: staging
+  before_script:
+    - !reference [.bootstrap_check, before_script]
   resource_group: terraform-staging
-  rules:
-    - if: "$CI_COMMIT_REF_PROTECTED"
-      when: manual
   script:
     - terragrunt apply --working-dir staging/foundation -auto-approve "$CI_PROJECT_DIR/staging.foundation.tfplan"
     - terragrunt apply --working-dir staging/workload -auto-approve
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
+      when: manual
 
 apply_production:
   stage: apply_production
@@ -100,13 +122,17 @@ apply_production:
   needs:
     - job: plan_production
     - job: apply_staging
+  variables:
+    TG_WORKING_DIR: staging
+  before_script:
+    - !reference [.bootstrap_check, before_script]
   resource_group: terraform-production
-  rules:
-    - if: "$CI_COMMIT_REF_PROTECTED"
-      when: manual
   script:
     - terragrunt apply --working-dir production/foundation -auto-approve "$CI_PROJECT_DIR/production.foundation.tfplan"
     - terragrunt apply --working-dir production/workload -auto-approve
+  rules:
+    - if: "$CI_COMMIT_REF_PROTECTED"
+      when: manual
 
 destroy_staging:
   stage: destroy
